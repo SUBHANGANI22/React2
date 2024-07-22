@@ -1,45 +1,22 @@
-/* AnalogClock.css */
-.analog-clock {
+.calendar-button {
   position: relative;
-  width: 150px;
-  height: 150px;
-  border: 2px solid #000;
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
 }
 
-.hand {
-  position: absolute;
-  background: #000;
-  border-radius: 50%;
-  transform-origin: bottom center;
-  transition: transform 0.2s;
+.custom-popover {
+  position: absolute !important;
+  top: -30px; /* Adjust as needed to position above the icon */
+  left: 1100px;
+  z-index: 1050;
 }
 
-.hand.hour {
-  width: 4px;
-  height: 50px;
-  top: 25%;
-  left: 50%;
-  transform: rotate(90deg);
+.custom-datepicker {
+  padding: 0; /* Remove extra padding */
 }
 
-.hand.minute {
-  width: 2px;
-  height: 70px;
-  top: 15%;
-  left: 50%;
-  transform: rotate(90deg);
+.edit-btn {
+  color: #868b91; /* Set a color for the edit icon */
 }
 
-.center {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: #000;
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  }
+.delete-btn {
+  color: red; /* Set a color for the delete icon */
+}
