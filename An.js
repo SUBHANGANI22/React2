@@ -1,136 +1,137 @@
-// TaskManager.js
-import React, { useState, useEffect, useRef } from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Modal, Button, Popover, OverlayTrigger } from 'react-bootstrap';
-import AnalogClock from './AnalogClock'; // Import the AnalogClock component
-import { v4 as uuidv4 } from 'uuid';
-import './TaskManager.css';
-import { FaCalendarAlt } from 'react-icons/fa';
-
+import React, { useState, useEffect, useRef } from "react";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Modal, Button, Popover, OverlayTrigger } from "react-bootstrap";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { v4 as uuidv4 } from "uuid";
+import "./TaskManager.css";
+import { FaCalendarAlt } from "react-icons/fa";
 const TaskManager = () => {
   const [tasks, setTasks] = useState([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [deadline, setDeadline] = useState(null);
-  const [editInput, setEditInput] = useState('');
+  const [editInput, setEditInput] = useState("");
   const [editDeadline, setEditDeadline] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [currentTaskId, setCurrentTaskId] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState(null);
-  const [sortOrder, setSortOrder] = useState('name');
+  const [sortOrder, setSortOrder] = useState("name");
   const calendarRef = useRef(null);
-
   useEffect(() => {
-    const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
     sortTasks(storedTasks, sortOrder);
     setTasks(storedTasks);
   }, [sortOrder]);
-
   const addTask = () => {
     if (!input.trim()) {
-      alert('Task name is required');
+      alert("Task name is required");
       return;
     }
     if (!deadline) {
-      alert('Deadline is required');
+      alert("Deadline is required");
       return;
     }
-    const newTasks = [...tasks, { id: uuidv4(), task: input, status: 'todo', deadline }];
+    const newTasks = [
+      ...tasks,
+      { id: uuidv4(), task: input, status: "todo", deadline },
+    ];
     sortTasks(newTasks, sortOrder);
     setTasks(newTasks);
-    setInput('');
+    setInput("");
     setDeadline(null);
     saveTasksToLocalStorage(newTasks);
   };
-
   const saveTask = () => {
     if (!editInput.trim()) {
-      alert('Task name is required');
+      alert("Task name is required");
       return;
     }
     if (!editDeadline) {
-      alert('Deadline is required');
+      alert("Deadline is required");
       return;
     }
-    const newTasks = tasks.map(task =>
+    const newTasks = tasks.map((task) =>
       task.id === currentTaskId
         ? { ...task, task: editInput, deadline: editDeadline }
         : task
     );
     sortTasks(newTasks, sortOrder);
     setTasks(newTasks);
-    setEditInput('');
+    setEditInput("");
     setEditDeadline(null);
     setEditMode(false);
     setCurrentTaskId(null);
     saveTasksToLocalStorage(newTasks);
   };
-
   const cancelEdit = () => {
-    setEditInput('');
+    setEditInput("");
     setEditDeadline(null);
     setEditMode(false);
     setCurrentTaskId(null);
   };
-
   const handleDelete = () => {
-    const newTasks = tasks.filter(task => task.id !== taskToDelete);
+    const newTasks = tasks.filter((task) => task.id !== taskToDelete);
     setTasks(newTasks);
     saveTasksToLocalStorage(newTasks);
     setShowConfirm(false);
     setTaskToDelete(null);
   };
-
   const handleStatusChange = (id, status) => {
-    const newTasks = tasks.map(task =>
-      task.id === id
-        ? { ...task, status }
-        : task
+    const newTasks = tasks.map((task) =>
+      task.id === id ? { ...task, status } : task
     );
     sortTasks(newTasks, sortOrder);
     setTasks(newTasks);
     saveTasksToLocalStorage(newTasks);
   };
-
   const handleSort = (e) => {
     setSortOrder(e.target.value);
   };
-
   const sortTasks = (tasks, criteria) => {
-    if (criteria === 'name') {
-      tasks.sort((a, b) => (a.task || '').localeCompare(b.task || ''));
-    } else if (criteria === 'status') {
-      tasks.sort((a, b) => (a.status || '').localeCompare(b.status || ''));
-    } else if (criteria === 'date') {
-      tasks.sort((a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0));
+    if (criteria === "name") {
+      tasks.sort((a, b) => (a.task || "").localeCompare(b.task || ""));
+    } else if (criteria === "status") {
+      tasks.sort((a, b) => (a.status || "").localeCompare(b.status || ""));
+    } else if (criteria === "date") {
+      tasks.sort(
+        (a, b) => new Date(a.deadline || 0) - new Date(b.deadline || 0)
+      );
     }
   };
-
   const saveTasksToLocalStorage = (tasks) => {
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem("tasks", JSON.stringify(tasks));
   };
-
   const getTaskColor = (task) => {
-    if (task.status === 'completed') return 'green';
-    if (!task.deadline) return 'black';
-
+    if (task.status === "completed") return "green";
+    if (!task.deadline) return "black";
     const timeDiff = new Date(task.deadline) - new Date();
-    if (timeDiff < 12 * 60 * 60 * 1000) return 'red';
-    if (timeDiff < 24 * 60 * 60 * 1000) return 'yellow';
-    return 'black';
+    if (timeDiff < 12 * 60 * 60 * 1000) return "red";
+    if (timeDiff < 24 * 60 * 60 * 1000) return "blue";
+    return "black";
   };
-
-  const ClockPopover = ({ time, setTime }) => (
-    <Popover id="clock-popover" className="custom-popover">
+  const DatePickerPopover = ({ date, setDate }) => (
+    <Popover id="date-picker-popover" className="custom-popover">
       <Popover.Body>
-        <AnalogClock time={time} setTime={setTime} />
+        <DatePicker
+          selected={date}
+          onChange={(date) => setDate(date)}
+          showTimeSelect
+          timeFormat="hh:mm aa"
+          timeIntervals={15}
+          dateFormat="MMMM d, yyyy h:mm aa"
+          inline
+          calendarClassName="custom-datepicker"
+        />
       </Popover.Body>
     </Popover>
   );
-
   return (
     <div className="container">
-      <div className="todo-container" style={{ maxWidth: '500px', margin: 'auto' }}>
+      <div
+        className="todo-container"
+        style={{ maxWidth: "500px", margin: "auto" }}
+      >
         <h1 className="fs-3 text-center">Task</h1>
         {editMode ? (
           <>
@@ -146,9 +147,17 @@ const TaskManager = () => {
               <OverlayTrigger
                 trigger="click"
                 placement="bottom"
-                overlay={<ClockPopover time={editDeadline} setTime={setEditDeadline} />}
+                overlay={
+                  <DatePickerPopover
+                    date={editDeadline}
+                    setDate={setEditDeadline}
+                  />
+                }
               >
-                <button ref={calendarRef} className="btn btn-light calendar-button">
+                <button
+                  ref={calendarRef}
+                  className="btn btn-light calendar-button"
+                >
                   <FaCalendarAlt />
                 </button>
               </OverlayTrigger>
@@ -174,9 +183,14 @@ const TaskManager = () => {
               <OverlayTrigger
                 trigger="click"
                 placement="bottom"
-                overlay={<ClockPopover time={deadline} setTime={setDeadline} />}
+                overlay={
+                  <DatePickerPopover date={deadline} setDate={setDeadline} />
+                }
               >
-                <button ref={calendarRef} className="btn btn-light calendar-button">
+                <button
+                  ref={calendarRef}
+                  className="btn btn-light calendar-button"
+                >
                   <FaCalendarAlt />
                 </button>
               </OverlayTrigger>
@@ -186,12 +200,15 @@ const TaskManager = () => {
             </div>
           </>
         )}
-
         <div className="border rounded-2 p-2">
           <div className="mt-3 d-flex justify-content-between border-bottom">
             <h3 className="fs-6">Task</h3>
             <div>
-              <select className="form-select" onChange={handleSort} value={sortOrder}>
+              <select
+                className="form-select"
+                onChange={handleSort}
+                value={sortOrder}
+              >
                 <option value="name">Sort by Name</option>
                 <option value="status">Sort by Status</option>
                 <option value="date">Sort by Date</option>
@@ -204,24 +221,29 @@ const TaskManager = () => {
               <li key={task.id}>
                 <div className="d-flex justify-content-between align-items-center border-bottom">
                   <div className="d-flex flex-column w-50">
-                    <p className="p-1 mb-0 fs-6" style={{ color: getTaskColor(task) }}>
+                    <p
+                      className="p-1 mb-0 fs-6"
+                      style={{ color: getTaskColor(task) }}
+                    >
                       {task.task}
                     </p>
                     <small className="text-muted">
-                      {new Date(task.deadline).toLocaleString('en-US', {
-                        month: 'short',
-                        day: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
+                      {new Date(task.deadline).toLocaleString("en-US", {
+                        month: "short",
+                        day: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
                       })}
                     </small>
                   </div>
                   <select
                     className="w-25 task-status"
                     value={task.status}
-                    onChange={(e) => handleStatusChange(task.id, e.target.value)}
+                    onChange={(e) =>
+                      handleStatusChange(task.id, e.target.value)
+                    }
                   >
                     <option value="todo">Todo</option>
                     <option value="in-progress">In progress</option>
@@ -272,5 +294,4 @@ const TaskManager = () => {
     </div>
   );
 };
-
 export default TaskManager;
